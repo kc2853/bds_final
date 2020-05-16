@@ -1,0 +1,1494 @@
+<?xml version="1.0" encoding="UTF-8"?><process version="9.6.000">
+  <context>
+    <input/>
+    <output/>
+    <macros/>
+  </context>
+  <operator activated="true" class="process" compatibility="9.6.000" expanded="true" name="Process">
+    <parameter key="logverbosity" value="init"/>
+    <parameter key="random_seed" value="2001"/>
+    <parameter key="send_mail" value="never"/>
+    <parameter key="notification_email" value=""/>
+    <parameter key="process_duration_for_mail" value="30"/>
+    <parameter key="encoding" value="SYSTEM"/>
+    <process expanded="true">
+      <operator activated="true" class="subprocess" compatibility="9.6.000" expanded="true" height="124" name="SVM_WindowSize1" width="90" x="112" y="34">
+        <process expanded="true">
+          <operator activated="true" class="subprocess" compatibility="9.6.000" expanded="true" height="103" name="Split Data" width="90" x="45" y="34">
+            <process expanded="true">
+              <operator activated="true" class="retrieve" compatibility="9.6.000" expanded="true" height="68" name="Retrieve res_timeseries20190101_20200324" width="90" x="45" y="34">
+                <parameter key="repository_entry" value="../data/res_timeseries20190101_20200324"/>
+              </operator>
+              <operator activated="true" class="filter_example_range" compatibility="9.6.000" expanded="true" height="82" name="Filter Example Range" width="90" x="179" y="34">
+                <parameter key="first_example" value="1"/>
+                <parameter key="last_example" value="365"/>
+                <parameter key="invert_filter" value="false"/>
+              </operator>
+              <operator activated="true" class="filter_example_range" compatibility="9.6.000" expanded="true" height="82" name="Filter Example Range (2)" width="90" x="313" y="187">
+                <parameter key="first_example" value="1"/>
+                <parameter key="last_example" value="365"/>
+                <parameter key="invert_filter" value="true"/>
+              </operator>
+              <connect from_op="Retrieve res_timeseries20190101_20200324" from_port="output" to_op="Filter Example Range" to_port="example set input"/>
+              <connect from_op="Filter Example Range" from_port="example set output" to_port="out 1"/>
+              <connect from_op="Filter Example Range" from_port="original" to_op="Filter Example Range (2)" to_port="example set input"/>
+              <connect from_op="Filter Example Range (2)" from_port="example set output" to_port="out 2"/>
+              <portSpacing port="source_in 1" spacing="0"/>
+              <portSpacing port="sink_out 1" spacing="0"/>
+              <portSpacing port="sink_out 2" spacing="0"/>
+              <portSpacing port="sink_out 3" spacing="0"/>
+            </process>
+          </operator>
+          <operator activated="true" class="time_series:windowing" compatibility="9.6.000" expanded="true" height="82" name="Windowing (4)" width="90" x="313" y="289">
+            <parameter key="attribute_filter_type" value="all"/>
+            <parameter key="attribute" value="AvgGasPrice"/>
+            <parameter key="attributes" value=""/>
+            <parameter key="use_except_expression" value="false"/>
+            <parameter key="value_type" value="attribute_value"/>
+            <parameter key="use_value_type_exception" value="false"/>
+            <parameter key="except_value_type" value="time"/>
+            <parameter key="block_type" value="attribute_block"/>
+            <parameter key="use_block_type_exception" value="false"/>
+            <parameter key="except_block_type" value="value_matrix_row_start"/>
+            <parameter key="invert_selection" value="false"/>
+            <parameter key="include_special_attributes" value="false"/>
+            <parameter key="has_indices" value="true"/>
+            <parameter key="indices_attribute" value="Date(UTC)"/>
+            <parameter key="window_size" value="1"/>
+            <parameter key="no_overlapping_windows" value="false"/>
+            <parameter key="step_size" value="1"/>
+            <parameter key="create_horizon_(labels)" value="true"/>
+            <parameter key="horizon_attribute" value="Price"/>
+            <parameter key="horizon_size" value="1"/>
+            <parameter key="horizon_offset" value="0"/>
+          </operator>
+          <operator activated="true" class="time_series:windowing" compatibility="9.6.000" expanded="true" height="82" name="Windowing (3)" width="90" x="179" y="34">
+            <parameter key="attribute_filter_type" value="all"/>
+            <parameter key="attribute" value="AvgGasPrice"/>
+            <parameter key="attributes" value=""/>
+            <parameter key="use_except_expression" value="false"/>
+            <parameter key="value_type" value="attribute_value"/>
+            <parameter key="use_value_type_exception" value="false"/>
+            <parameter key="except_value_type" value="time"/>
+            <parameter key="block_type" value="attribute_block"/>
+            <parameter key="use_block_type_exception" value="false"/>
+            <parameter key="except_block_type" value="value_matrix_row_start"/>
+            <parameter key="invert_selection" value="false"/>
+            <parameter key="include_special_attributes" value="false"/>
+            <parameter key="has_indices" value="true"/>
+            <parameter key="indices_attribute" value="Date(UTC)"/>
+            <parameter key="window_size" value="1"/>
+            <parameter key="no_overlapping_windows" value="false"/>
+            <parameter key="step_size" value="1"/>
+            <parameter key="create_horizon_(labels)" value="true"/>
+            <parameter key="horizon_attribute" value="Price"/>
+            <parameter key="horizon_size" value="1"/>
+            <parameter key="horizon_offset" value="0"/>
+          </operator>
+          <operator activated="true" class="multiply" compatibility="9.6.000" expanded="true" height="103" name="Multiply (3)" width="90" x="313" y="34"/>
+          <operator activated="true" class="concurrency:optimize_parameters_grid" compatibility="9.6.000" expanded="true" height="124" name="Opt1" width="90" x="447" y="34">
+            <list key="parameters">
+              <parameter key="SVM (2).kernel_type" value="dot,radial,polynomial"/>
+              <parameter key="SVM (2).C" value="[0;1000;50;quadratic]"/>
+            </list>
+            <parameter key="error_handling" value="fail on error"/>
+            <parameter key="log_performance" value="true"/>
+            <parameter key="log_all_criteria" value="false"/>
+            <parameter key="synchronize" value="false"/>
+            <parameter key="enable_parallel_execution" value="true"/>
+            <process expanded="true">
+              <operator activated="true" class="time_series:sliding_window_validation" compatibility="9.6.000" expanded="true" height="145" name="Sliding Window Validation" width="90" x="380" y="34">
+                <parameter key="has_indices" value="true"/>
+                <parameter key="indices_attribute" value="Last Date(UTC) in window"/>
+                <parameter key="training_window_size" value="90"/>
+                <parameter key="no_overlapping_windows" value="false"/>
+                <parameter key="step_size" value="30"/>
+                <parameter key="test_window_size" value="30"/>
+                <parameter key="enable_parallel_execution" value="true"/>
+                <process expanded="true">
+                  <operator activated="false" class="h2o:gradient_boosted_trees" compatibility="9.3.001" expanded="true" height="103" name="Gradient Boosted Trees (2)" width="90" x="179" y="34">
+                    <parameter key="number_of_trees" value="100"/>
+                    <parameter key="reproducible" value="false"/>
+                    <parameter key="maximum_number_of_threads" value="4"/>
+                    <parameter key="use_local_random_seed" value="false"/>
+                    <parameter key="local_random_seed" value="1992"/>
+                    <parameter key="maximal_depth" value="10"/>
+                    <parameter key="min_rows" value="10.0"/>
+                    <parameter key="min_split_improvement" value="0.0"/>
+                    <parameter key="number_of_bins" value="20"/>
+                    <parameter key="learning_rate" value="0.01"/>
+                    <parameter key="sample_rate" value="1.0"/>
+                    <parameter key="distribution" value="AUTO"/>
+                    <parameter key="early_stopping" value="false"/>
+                    <parameter key="stopping_rounds" value="1"/>
+                    <parameter key="stopping_metric" value="AUTO"/>
+                    <parameter key="stopping_tolerance" value="0.001"/>
+                    <parameter key="max_runtime_seconds" value="0"/>
+                    <list key="expert_parameters"/>
+                  </operator>
+                  <operator activated="false" class="h2o:deep_learning" compatibility="9.3.001" expanded="true" height="82" name="Deep Learning (2)" width="90" x="179" y="187">
+                    <parameter key="activation" value="RectifierWithDropout"/>
+                    <enumeration key="hidden_layer_sizes">
+                      <parameter key="hidden_layer_sizes" value="400"/>
+                      <parameter key="hidden_layer_sizes" value="400"/>
+                      <parameter key="hidden_layer_sizes" value="200"/>
+                      <parameter key="hidden_layer_sizes" value="100"/>
+                    </enumeration>
+                    <enumeration key="hidden_dropout_ratios">
+                      <parameter key="hidden_dropout_ratio" value="0.5"/>
+                      <parameter key="hidden_dropout_ratio" value="0.5"/>
+                      <parameter key="hidden_dropout_ratio" value="0.5"/>
+                      <parameter key="hidden_dropout_ratio" value="0.5"/>
+                    </enumeration>
+                    <parameter key="reproducible_(uses_1_thread)" value="false"/>
+                    <parameter key="use_local_random_seed" value="false"/>
+                    <parameter key="local_random_seed" value="1992"/>
+                    <parameter key="epochs" value="50.0"/>
+                    <parameter key="compute_variable_importances" value="false"/>
+                    <parameter key="train_samples_per_iteration" value="-2"/>
+                    <parameter key="adaptive_rate" value="true"/>
+                    <parameter key="epsilon" value="1.0E-8"/>
+                    <parameter key="rho" value="0.99"/>
+                    <parameter key="learning_rate" value="0.005"/>
+                    <parameter key="learning_rate_annealing" value="1.0E-6"/>
+                    <parameter key="learning_rate_decay" value="1.0"/>
+                    <parameter key="momentum_start" value="0.0"/>
+                    <parameter key="momentum_ramp" value="1000000.0"/>
+                    <parameter key="momentum_stable" value="0.0"/>
+                    <parameter key="nesterov_accelerated_gradient" value="true"/>
+                    <parameter key="standardize" value="true"/>
+                    <parameter key="L1" value="1.0E-5"/>
+                    <parameter key="L2" value="0.0"/>
+                    <parameter key="max_w2" value="10.0"/>
+                    <parameter key="loss_function" value="Automatic"/>
+                    <parameter key="distribution_function" value="AUTO"/>
+                    <parameter key="early_stopping" value="false"/>
+                    <parameter key="stopping_rounds" value="1"/>
+                    <parameter key="stopping_metric" value="AUTO"/>
+                    <parameter key="stopping_tolerance" value="0.001"/>
+                    <parameter key="missing_values_handling" value="MeanImputation"/>
+                    <parameter key="max_runtime_seconds" value="0"/>
+                    <list key="expert_parameters"/>
+                    <list key="expert_parameters_"/>
+                  </operator>
+                  <operator activated="true" class="support_vector_machine" compatibility="9.6.000" expanded="true" height="124" name="SVM (2)" width="90" x="179" y="289">
+                    <parameter key="kernel_type" value="dot"/>
+                    <parameter key="kernel_gamma" value="1.0"/>
+                    <parameter key="kernel_sigma1" value="1.0"/>
+                    <parameter key="kernel_sigma2" value="0.0"/>
+                    <parameter key="kernel_sigma3" value="2.0"/>
+                    <parameter key="kernel_shift" value="1.0"/>
+                    <parameter key="kernel_degree" value="2.0"/>
+                    <parameter key="kernel_a" value="1.0"/>
+                    <parameter key="kernel_b" value="0.0"/>
+                    <parameter key="kernel_cache" value="200"/>
+                    <parameter key="C" value="0.0"/>
+                    <parameter key="convergence_epsilon" value="0.001"/>
+                    <parameter key="max_iterations" value="100000"/>
+                    <parameter key="scale" value="true"/>
+                    <parameter key="calculate_weights" value="true"/>
+                    <parameter key="return_optimization_performance" value="true"/>
+                    <parameter key="L_pos" value="1.0"/>
+                    <parameter key="L_neg" value="1.0"/>
+                    <parameter key="epsilon" value="0.0"/>
+                    <parameter key="epsilon_plus" value="0.0"/>
+                    <parameter key="epsilon_minus" value="0.0"/>
+                    <parameter key="balance_cost" value="false"/>
+                    <parameter key="quadratic_loss_pos" value="false"/>
+                    <parameter key="quadratic_loss_neg" value="false"/>
+                    <parameter key="estimate_performance" value="false"/>
+                  </operator>
+                  <connect from_port="training set" to_op="SVM (2)" to_port="training set"/>
+                  <connect from_op="SVM (2)" from_port="model" to_port="model"/>
+                  <portSpacing port="source_training set" spacing="0"/>
+                  <portSpacing port="sink_model" spacing="0"/>
+                  <portSpacing port="sink_through 1" spacing="0"/>
+                </process>
+                <process expanded="true">
+                  <operator activated="true" class="apply_model" compatibility="9.6.000" expanded="true" height="82" name="Apply Model (2)" width="90" x="45" y="34">
+                    <list key="application_parameters"/>
+                    <parameter key="create_view" value="false"/>
+                  </operator>
+                  <operator activated="true" class="performance_regression" compatibility="9.6.000" expanded="true" height="82" name="Performance (Regression) (2)" width="90" x="179" y="34">
+                    <parameter key="main_criterion" value="first"/>
+                    <parameter key="root_mean_squared_error" value="true"/>
+                    <parameter key="absolute_error" value="true"/>
+                    <parameter key="relative_error" value="true"/>
+                    <parameter key="relative_error_lenient" value="false"/>
+                    <parameter key="relative_error_strict" value="false"/>
+                    <parameter key="normalized_absolute_error" value="false"/>
+                    <parameter key="root_relative_squared_error" value="false"/>
+                    <parameter key="squared_error" value="false"/>
+                    <parameter key="correlation" value="true"/>
+                    <parameter key="squared_correlation" value="false"/>
+                    <parameter key="prediction_average" value="false"/>
+                    <parameter key="spearman_rho" value="false"/>
+                    <parameter key="kendall_tau" value="false"/>
+                    <parameter key="skip_undefined_labels" value="true"/>
+                    <parameter key="use_example_weights" value="true"/>
+                  </operator>
+                  <connect from_port="test set" to_op="Apply Model (2)" to_port="unlabelled data"/>
+                  <connect from_port="model" to_op="Apply Model (2)" to_port="model"/>
+                  <connect from_op="Apply Model (2)" from_port="labelled data" to_op="Performance (Regression) (2)" to_port="labelled data"/>
+                  <connect from_op="Performance (Regression) (2)" from_port="performance" to_port="performance 1"/>
+                  <connect from_op="Performance (Regression) (2)" from_port="example set" to_port="test set results"/>
+                  <portSpacing port="source_test set" spacing="0"/>
+                  <portSpacing port="source_model" spacing="0"/>
+                  <portSpacing port="source_through 1" spacing="0"/>
+                  <portSpacing port="sink_test set results" spacing="0"/>
+                  <portSpacing port="sink_performance 1" spacing="0"/>
+                  <portSpacing port="sink_performance 2" spacing="0"/>
+                </process>
+              </operator>
+              <connect from_port="input 1" to_op="Sliding Window Validation" to_port="example set"/>
+              <connect from_op="Sliding Window Validation" from_port="model" to_port="model"/>
+              <connect from_op="Sliding Window Validation" from_port="performance 1" to_port="performance"/>
+              <portSpacing port="source_input 1" spacing="0"/>
+              <portSpacing port="source_input 2" spacing="0"/>
+              <portSpacing port="sink_performance" spacing="0"/>
+              <portSpacing port="sink_model" spacing="0"/>
+              <portSpacing port="sink_output 1" spacing="0"/>
+            </process>
+          </operator>
+          <operator activated="true" class="model_simulator:explain_predictions" compatibility="9.6.000" expanded="true" height="124" name="Pred1" width="90" x="447" y="289">
+            <parameter key="maximal explaining attributes" value="3"/>
+            <parameter key="local sample size" value="500"/>
+            <parameter key="only create predictions" value="false"/>
+            <parameter key="normalize global weights" value="false"/>
+            <parameter key="sort_weights" value="true"/>
+            <parameter key="sort_direction" value="descending"/>
+          </operator>
+          <operator activated="true" class="performance_regression" compatibility="9.6.000" expanded="true" height="82" name="Perf1" width="90" x="648" y="187">
+            <parameter key="main_criterion" value="first"/>
+            <parameter key="root_mean_squared_error" value="true"/>
+            <parameter key="absolute_error" value="true"/>
+            <parameter key="relative_error" value="true"/>
+            <parameter key="relative_error_lenient" value="false"/>
+            <parameter key="relative_error_strict" value="false"/>
+            <parameter key="normalized_absolute_error" value="false"/>
+            <parameter key="root_relative_squared_error" value="false"/>
+            <parameter key="squared_error" value="false"/>
+            <parameter key="correlation" value="true"/>
+            <parameter key="squared_correlation" value="false"/>
+            <parameter key="prediction_average" value="false"/>
+            <parameter key="spearman_rho" value="false"/>
+            <parameter key="kendall_tau" value="false"/>
+            <parameter key="skip_undefined_labels" value="true"/>
+            <parameter key="use_example_weights" value="true"/>
+          </operator>
+          <operator activated="true" class="write_as_text" compatibility="9.6.000" expanded="true" height="124" name="SVM_WindowSize1 Results" width="90" x="648" y="34">
+            <parameter key="result_file" value="D:\My문서\2019-2020 NYU PhD 1\Data Science\SVM_WindowSize1.res"/>
+            <parameter key="encoding" value="SYSTEM"/>
+          </operator>
+          <connect from_op="Split Data" from_port="out 1" to_op="Windowing (3)" to_port="example set"/>
+          <connect from_op="Split Data" from_port="out 2" to_op="Windowing (4)" to_port="example set"/>
+          <connect from_op="Windowing (4)" from_port="windowed example set" to_op="Pred1" to_port="test data"/>
+          <connect from_op="Windowing (3)" from_port="windowed example set" to_op="Multiply (3)" to_port="input"/>
+          <connect from_op="Multiply (3)" from_port="output 1" to_op="Opt1" to_port="input 1"/>
+          <connect from_op="Multiply (3)" from_port="output 2" to_op="Pred1" to_port="training data"/>
+          <connect from_op="Opt1" from_port="model" to_op="Pred1" to_port="model"/>
+          <connect from_op="Opt1" from_port="parameter set" to_op="SVM_WindowSize1 Results" to_port="input 1"/>
+          <connect from_op="Pred1" from_port="example set output" to_op="Perf1" to_port="labelled data"/>
+          <connect from_op="Pred1" from_port="global weights output" to_op="SVM_WindowSize1 Results" to_port="input 2"/>
+          <connect from_op="Perf1" from_port="performance" to_op="SVM_WindowSize1 Results" to_port="input 3"/>
+          <connect from_op="SVM_WindowSize1 Results" from_port="input 1" to_port="out 1"/>
+          <connect from_op="SVM_WindowSize1 Results" from_port="input 2" to_port="out 2"/>
+          <connect from_op="SVM_WindowSize1 Results" from_port="input 3" to_port="out 3"/>
+          <portSpacing port="source_in 1" spacing="0"/>
+          <portSpacing port="sink_out 1" spacing="0"/>
+          <portSpacing port="sink_out 2" spacing="0"/>
+          <portSpacing port="sink_out 3" spacing="0"/>
+          <portSpacing port="sink_out 4" spacing="0"/>
+        </process>
+      </operator>
+      <operator activated="true" class="subprocess" compatibility="9.6.000" expanded="true" height="124" name="SVM_WindowSize2" width="90" x="112" y="187">
+        <process expanded="true">
+          <operator activated="true" class="subprocess" compatibility="9.6.000" expanded="true" height="103" name="Split Data (2)" width="90" x="45" y="34">
+            <process expanded="true">
+              <operator activated="true" class="retrieve" compatibility="9.6.000" expanded="true" height="68" name="Retrieve res_timeseries20190101_20200324 (2)" width="90" x="45" y="34">
+                <parameter key="repository_entry" value="../data/res_timeseries20190101_20200324"/>
+              </operator>
+              <operator activated="true" class="filter_example_range" compatibility="9.6.000" expanded="true" height="82" name="Filter Example Range (3)" width="90" x="179" y="34">
+                <parameter key="first_example" value="1"/>
+                <parameter key="last_example" value="365"/>
+                <parameter key="invert_filter" value="false"/>
+              </operator>
+              <operator activated="true" class="filter_example_range" compatibility="9.6.000" expanded="true" height="82" name="Filter Example Range (4)" width="90" x="313" y="187">
+                <parameter key="first_example" value="1"/>
+                <parameter key="last_example" value="365"/>
+                <parameter key="invert_filter" value="true"/>
+              </operator>
+              <connect from_op="Retrieve res_timeseries20190101_20200324 (2)" from_port="output" to_op="Filter Example Range (3)" to_port="example set input"/>
+              <connect from_op="Filter Example Range (3)" from_port="example set output" to_port="out 1"/>
+              <connect from_op="Filter Example Range (3)" from_port="original" to_op="Filter Example Range (4)" to_port="example set input"/>
+              <connect from_op="Filter Example Range (4)" from_port="example set output" to_port="out 2"/>
+              <portSpacing port="source_in 1" spacing="0"/>
+              <portSpacing port="sink_out 1" spacing="0"/>
+              <portSpacing port="sink_out 2" spacing="0"/>
+              <portSpacing port="sink_out 3" spacing="0"/>
+            </process>
+          </operator>
+          <operator activated="true" class="time_series:windowing" compatibility="9.6.000" expanded="true" height="82" name="Windowing (12)" width="90" x="313" y="289">
+            <parameter key="attribute_filter_type" value="all"/>
+            <parameter key="attribute" value="AvgGasPrice"/>
+            <parameter key="attributes" value=""/>
+            <parameter key="use_except_expression" value="false"/>
+            <parameter key="value_type" value="attribute_value"/>
+            <parameter key="use_value_type_exception" value="false"/>
+            <parameter key="except_value_type" value="time"/>
+            <parameter key="block_type" value="attribute_block"/>
+            <parameter key="use_block_type_exception" value="false"/>
+            <parameter key="except_block_type" value="value_matrix_row_start"/>
+            <parameter key="invert_selection" value="false"/>
+            <parameter key="include_special_attributes" value="false"/>
+            <parameter key="has_indices" value="true"/>
+            <parameter key="indices_attribute" value="Date(UTC)"/>
+            <parameter key="window_size" value="2"/>
+            <parameter key="no_overlapping_windows" value="false"/>
+            <parameter key="step_size" value="1"/>
+            <parameter key="create_horizon_(labels)" value="true"/>
+            <parameter key="horizon_attribute" value="Price"/>
+            <parameter key="horizon_size" value="1"/>
+            <parameter key="horizon_offset" value="0"/>
+          </operator>
+          <operator activated="true" class="time_series:windowing" compatibility="9.6.000" expanded="true" height="82" name="Windowing (11)" width="90" x="179" y="34">
+            <parameter key="attribute_filter_type" value="all"/>
+            <parameter key="attribute" value="AvgGasPrice"/>
+            <parameter key="attributes" value=""/>
+            <parameter key="use_except_expression" value="false"/>
+            <parameter key="value_type" value="attribute_value"/>
+            <parameter key="use_value_type_exception" value="false"/>
+            <parameter key="except_value_type" value="time"/>
+            <parameter key="block_type" value="attribute_block"/>
+            <parameter key="use_block_type_exception" value="false"/>
+            <parameter key="except_block_type" value="value_matrix_row_start"/>
+            <parameter key="invert_selection" value="false"/>
+            <parameter key="include_special_attributes" value="false"/>
+            <parameter key="has_indices" value="true"/>
+            <parameter key="indices_attribute" value="Date(UTC)"/>
+            <parameter key="window_size" value="2"/>
+            <parameter key="no_overlapping_windows" value="false"/>
+            <parameter key="step_size" value="1"/>
+            <parameter key="create_horizon_(labels)" value="true"/>
+            <parameter key="horizon_attribute" value="Price"/>
+            <parameter key="horizon_size" value="1"/>
+            <parameter key="horizon_offset" value="0"/>
+          </operator>
+          <operator activated="true" class="multiply" compatibility="9.6.000" expanded="true" height="103" name="Multiply (11)" width="90" x="313" y="34"/>
+          <operator activated="true" class="concurrency:optimize_parameters_grid" compatibility="9.6.000" expanded="true" height="124" name="Opt2" width="90" x="447" y="34">
+            <list key="parameters">
+              <parameter key="SVM (6).kernel_type" value="dot,radial,polynomial"/>
+              <parameter key="SVM (6).C" value="[0;1000;50;quadratic]"/>
+            </list>
+            <parameter key="error_handling" value="fail on error"/>
+            <parameter key="log_performance" value="true"/>
+            <parameter key="log_all_criteria" value="false"/>
+            <parameter key="synchronize" value="false"/>
+            <parameter key="enable_parallel_execution" value="true"/>
+            <process expanded="true">
+              <operator activated="true" class="time_series:sliding_window_validation" compatibility="9.6.000" expanded="true" height="145" name="Sliding Window Validation (6)" width="90" x="380" y="34">
+                <parameter key="has_indices" value="true"/>
+                <parameter key="indices_attribute" value="Last Date(UTC) in window"/>
+                <parameter key="training_window_size" value="90"/>
+                <parameter key="no_overlapping_windows" value="false"/>
+                <parameter key="step_size" value="30"/>
+                <parameter key="test_window_size" value="30"/>
+                <parameter key="enable_parallel_execution" value="true"/>
+                <process expanded="true">
+                  <operator activated="false" class="h2o:gradient_boosted_trees" compatibility="9.3.001" expanded="true" height="103" name="Gradient Boosted Trees (6)" width="90" x="179" y="34">
+                    <parameter key="number_of_trees" value="100"/>
+                    <parameter key="reproducible" value="false"/>
+                    <parameter key="maximum_number_of_threads" value="4"/>
+                    <parameter key="use_local_random_seed" value="false"/>
+                    <parameter key="local_random_seed" value="1992"/>
+                    <parameter key="maximal_depth" value="10"/>
+                    <parameter key="min_rows" value="10.0"/>
+                    <parameter key="min_split_improvement" value="0.0"/>
+                    <parameter key="number_of_bins" value="20"/>
+                    <parameter key="learning_rate" value="0.01"/>
+                    <parameter key="sample_rate" value="1.0"/>
+                    <parameter key="distribution" value="AUTO"/>
+                    <parameter key="early_stopping" value="false"/>
+                    <parameter key="stopping_rounds" value="1"/>
+                    <parameter key="stopping_metric" value="AUTO"/>
+                    <parameter key="stopping_tolerance" value="0.001"/>
+                    <parameter key="max_runtime_seconds" value="0"/>
+                    <list key="expert_parameters"/>
+                  </operator>
+                  <operator activated="false" class="h2o:deep_learning" compatibility="9.3.001" expanded="true" height="82" name="Deep Learning (6)" width="90" x="179" y="187">
+                    <parameter key="activation" value="RectifierWithDropout"/>
+                    <enumeration key="hidden_layer_sizes">
+                      <parameter key="hidden_layer_sizes" value="400"/>
+                      <parameter key="hidden_layer_sizes" value="400"/>
+                      <parameter key="hidden_layer_sizes" value="200"/>
+                      <parameter key="hidden_layer_sizes" value="100"/>
+                    </enumeration>
+                    <enumeration key="hidden_dropout_ratios">
+                      <parameter key="hidden_dropout_ratio" value="0.5"/>
+                      <parameter key="hidden_dropout_ratio" value="0.5"/>
+                      <parameter key="hidden_dropout_ratio" value="0.5"/>
+                      <parameter key="hidden_dropout_ratio" value="0.5"/>
+                    </enumeration>
+                    <parameter key="reproducible_(uses_1_thread)" value="false"/>
+                    <parameter key="use_local_random_seed" value="false"/>
+                    <parameter key="local_random_seed" value="1992"/>
+                    <parameter key="epochs" value="50.0"/>
+                    <parameter key="compute_variable_importances" value="false"/>
+                    <parameter key="train_samples_per_iteration" value="-2"/>
+                    <parameter key="adaptive_rate" value="true"/>
+                    <parameter key="epsilon" value="1.0E-8"/>
+                    <parameter key="rho" value="0.99"/>
+                    <parameter key="learning_rate" value="0.005"/>
+                    <parameter key="learning_rate_annealing" value="1.0E-6"/>
+                    <parameter key="learning_rate_decay" value="1.0"/>
+                    <parameter key="momentum_start" value="0.0"/>
+                    <parameter key="momentum_ramp" value="1000000.0"/>
+                    <parameter key="momentum_stable" value="0.0"/>
+                    <parameter key="nesterov_accelerated_gradient" value="true"/>
+                    <parameter key="standardize" value="true"/>
+                    <parameter key="L1" value="1.0E-5"/>
+                    <parameter key="L2" value="0.0"/>
+                    <parameter key="max_w2" value="10.0"/>
+                    <parameter key="loss_function" value="Automatic"/>
+                    <parameter key="distribution_function" value="AUTO"/>
+                    <parameter key="early_stopping" value="false"/>
+                    <parameter key="stopping_rounds" value="1"/>
+                    <parameter key="stopping_metric" value="AUTO"/>
+                    <parameter key="stopping_tolerance" value="0.001"/>
+                    <parameter key="missing_values_handling" value="MeanImputation"/>
+                    <parameter key="max_runtime_seconds" value="0"/>
+                    <list key="expert_parameters"/>
+                    <list key="expert_parameters_"/>
+                  </operator>
+                  <operator activated="true" class="support_vector_machine" compatibility="9.6.000" expanded="true" height="124" name="SVM (6)" width="90" x="179" y="289">
+                    <parameter key="kernel_type" value="dot"/>
+                    <parameter key="kernel_gamma" value="1.0"/>
+                    <parameter key="kernel_sigma1" value="1.0"/>
+                    <parameter key="kernel_sigma2" value="0.0"/>
+                    <parameter key="kernel_sigma3" value="2.0"/>
+                    <parameter key="kernel_shift" value="1.0"/>
+                    <parameter key="kernel_degree" value="2.0"/>
+                    <parameter key="kernel_a" value="1.0"/>
+                    <parameter key="kernel_b" value="0.0"/>
+                    <parameter key="kernel_cache" value="200"/>
+                    <parameter key="C" value="0.0"/>
+                    <parameter key="convergence_epsilon" value="0.001"/>
+                    <parameter key="max_iterations" value="100000"/>
+                    <parameter key="scale" value="true"/>
+                    <parameter key="calculate_weights" value="true"/>
+                    <parameter key="return_optimization_performance" value="true"/>
+                    <parameter key="L_pos" value="1.0"/>
+                    <parameter key="L_neg" value="1.0"/>
+                    <parameter key="epsilon" value="0.0"/>
+                    <parameter key="epsilon_plus" value="0.0"/>
+                    <parameter key="epsilon_minus" value="0.0"/>
+                    <parameter key="balance_cost" value="false"/>
+                    <parameter key="quadratic_loss_pos" value="false"/>
+                    <parameter key="quadratic_loss_neg" value="false"/>
+                    <parameter key="estimate_performance" value="false"/>
+                  </operator>
+                  <connect from_port="training set" to_op="SVM (6)" to_port="training set"/>
+                  <connect from_op="SVM (6)" from_port="model" to_port="model"/>
+                  <portSpacing port="source_training set" spacing="0"/>
+                  <portSpacing port="sink_model" spacing="0"/>
+                  <portSpacing port="sink_through 1" spacing="0"/>
+                </process>
+                <process expanded="true">
+                  <operator activated="true" class="apply_model" compatibility="9.6.000" expanded="true" height="82" name="Apply Model (6)" width="90" x="45" y="34">
+                    <list key="application_parameters"/>
+                    <parameter key="create_view" value="false"/>
+                  </operator>
+                  <operator activated="true" class="performance_regression" compatibility="9.6.000" expanded="true" height="82" name="Performance (Regression) (6)" width="90" x="179" y="34">
+                    <parameter key="main_criterion" value="first"/>
+                    <parameter key="root_mean_squared_error" value="true"/>
+                    <parameter key="absolute_error" value="true"/>
+                    <parameter key="relative_error" value="true"/>
+                    <parameter key="relative_error_lenient" value="false"/>
+                    <parameter key="relative_error_strict" value="false"/>
+                    <parameter key="normalized_absolute_error" value="false"/>
+                    <parameter key="root_relative_squared_error" value="false"/>
+                    <parameter key="squared_error" value="false"/>
+                    <parameter key="correlation" value="true"/>
+                    <parameter key="squared_correlation" value="false"/>
+                    <parameter key="prediction_average" value="false"/>
+                    <parameter key="spearman_rho" value="false"/>
+                    <parameter key="kendall_tau" value="false"/>
+                    <parameter key="skip_undefined_labels" value="true"/>
+                    <parameter key="use_example_weights" value="true"/>
+                  </operator>
+                  <connect from_port="test set" to_op="Apply Model (6)" to_port="unlabelled data"/>
+                  <connect from_port="model" to_op="Apply Model (6)" to_port="model"/>
+                  <connect from_op="Apply Model (6)" from_port="labelled data" to_op="Performance (Regression) (6)" to_port="labelled data"/>
+                  <connect from_op="Performance (Regression) (6)" from_port="performance" to_port="performance 1"/>
+                  <connect from_op="Performance (Regression) (6)" from_port="example set" to_port="test set results"/>
+                  <portSpacing port="source_test set" spacing="0"/>
+                  <portSpacing port="source_model" spacing="0"/>
+                  <portSpacing port="source_through 1" spacing="0"/>
+                  <portSpacing port="sink_test set results" spacing="0"/>
+                  <portSpacing port="sink_performance 1" spacing="0"/>
+                  <portSpacing port="sink_performance 2" spacing="0"/>
+                </process>
+              </operator>
+              <connect from_port="input 1" to_op="Sliding Window Validation (6)" to_port="example set"/>
+              <connect from_op="Sliding Window Validation (6)" from_port="model" to_port="model"/>
+              <connect from_op="Sliding Window Validation (6)" from_port="performance 1" to_port="performance"/>
+              <portSpacing port="source_input 1" spacing="0"/>
+              <portSpacing port="source_input 2" spacing="0"/>
+              <portSpacing port="sink_performance" spacing="0"/>
+              <portSpacing port="sink_model" spacing="0"/>
+              <portSpacing port="sink_output 1" spacing="0"/>
+            </process>
+          </operator>
+          <operator activated="true" class="model_simulator:explain_predictions" compatibility="9.6.000" expanded="true" height="124" name="Pred2" width="90" x="447" y="289">
+            <parameter key="maximal explaining attributes" value="3"/>
+            <parameter key="local sample size" value="500"/>
+            <parameter key="only create predictions" value="false"/>
+            <parameter key="normalize global weights" value="false"/>
+            <parameter key="sort_weights" value="true"/>
+            <parameter key="sort_direction" value="descending"/>
+          </operator>
+          <operator activated="true" class="performance_regression" compatibility="9.6.000" expanded="true" height="82" name="Perf2" width="90" x="648" y="187">
+            <parameter key="main_criterion" value="first"/>
+            <parameter key="root_mean_squared_error" value="true"/>
+            <parameter key="absolute_error" value="true"/>
+            <parameter key="relative_error" value="true"/>
+            <parameter key="relative_error_lenient" value="false"/>
+            <parameter key="relative_error_strict" value="false"/>
+            <parameter key="normalized_absolute_error" value="false"/>
+            <parameter key="root_relative_squared_error" value="false"/>
+            <parameter key="squared_error" value="false"/>
+            <parameter key="correlation" value="true"/>
+            <parameter key="squared_correlation" value="false"/>
+            <parameter key="prediction_average" value="false"/>
+            <parameter key="spearman_rho" value="false"/>
+            <parameter key="kendall_tau" value="false"/>
+            <parameter key="skip_undefined_labels" value="true"/>
+            <parameter key="use_example_weights" value="true"/>
+          </operator>
+          <operator activated="true" class="write_as_text" compatibility="9.6.000" expanded="true" height="124" name="SVM_WindowSize2 Results" width="90" x="648" y="34">
+            <parameter key="result_file" value="D:\My문서\2019-2020 NYU PhD 1\Data Science\SVM_WindowSize2.res"/>
+            <parameter key="encoding" value="SYSTEM"/>
+          </operator>
+          <connect from_op="Split Data (2)" from_port="out 1" to_op="Windowing (11)" to_port="example set"/>
+          <connect from_op="Split Data (2)" from_port="out 2" to_op="Windowing (12)" to_port="example set"/>
+          <connect from_op="Windowing (12)" from_port="windowed example set" to_op="Pred2" to_port="test data"/>
+          <connect from_op="Windowing (11)" from_port="windowed example set" to_op="Multiply (11)" to_port="input"/>
+          <connect from_op="Multiply (11)" from_port="output 1" to_op="Opt2" to_port="input 1"/>
+          <connect from_op="Multiply (11)" from_port="output 2" to_op="Pred2" to_port="training data"/>
+          <connect from_op="Opt2" from_port="model" to_op="Pred2" to_port="model"/>
+          <connect from_op="Opt2" from_port="parameter set" to_op="SVM_WindowSize2 Results" to_port="input 1"/>
+          <connect from_op="Pred2" from_port="example set output" to_op="Perf2" to_port="labelled data"/>
+          <connect from_op="Pred2" from_port="global weights output" to_op="SVM_WindowSize2 Results" to_port="input 2"/>
+          <connect from_op="Perf2" from_port="performance" to_op="SVM_WindowSize2 Results" to_port="input 3"/>
+          <connect from_op="SVM_WindowSize2 Results" from_port="input 1" to_port="out 1"/>
+          <connect from_op="SVM_WindowSize2 Results" from_port="input 2" to_port="out 2"/>
+          <connect from_op="SVM_WindowSize2 Results" from_port="input 3" to_port="out 3"/>
+          <portSpacing port="source_in 1" spacing="0"/>
+          <portSpacing port="sink_out 1" spacing="0"/>
+          <portSpacing port="sink_out 2" spacing="0"/>
+          <portSpacing port="sink_out 3" spacing="0"/>
+          <portSpacing port="sink_out 4" spacing="0"/>
+        </process>
+      </operator>
+      <operator activated="true" class="subprocess" compatibility="9.6.000" expanded="true" height="124" name="SVM_WindowSize3" width="90" x="112" y="340">
+        <process expanded="true">
+          <operator activated="true" class="subprocess" compatibility="9.6.000" expanded="true" height="103" name="Split Data (3)" width="90" x="45" y="34">
+            <process expanded="true">
+              <operator activated="true" class="retrieve" compatibility="9.6.000" expanded="true" height="68" name="Retrieve res_timeseries20190101_20200324 (3)" width="90" x="45" y="34">
+                <parameter key="repository_entry" value="../data/res_timeseries20190101_20200324"/>
+              </operator>
+              <operator activated="true" class="filter_example_range" compatibility="9.6.000" expanded="true" height="82" name="Filter Example Range (5)" width="90" x="179" y="34">
+                <parameter key="first_example" value="1"/>
+                <parameter key="last_example" value="365"/>
+                <parameter key="invert_filter" value="false"/>
+              </operator>
+              <operator activated="true" class="filter_example_range" compatibility="9.6.000" expanded="true" height="82" name="Filter Example Range (6)" width="90" x="313" y="187">
+                <parameter key="first_example" value="1"/>
+                <parameter key="last_example" value="365"/>
+                <parameter key="invert_filter" value="true"/>
+              </operator>
+              <connect from_op="Retrieve res_timeseries20190101_20200324 (3)" from_port="output" to_op="Filter Example Range (5)" to_port="example set input"/>
+              <connect from_op="Filter Example Range (5)" from_port="example set output" to_port="out 1"/>
+              <connect from_op="Filter Example Range (5)" from_port="original" to_op="Filter Example Range (6)" to_port="example set input"/>
+              <connect from_op="Filter Example Range (6)" from_port="example set output" to_port="out 2"/>
+              <portSpacing port="source_in 1" spacing="0"/>
+              <portSpacing port="sink_out 1" spacing="0"/>
+              <portSpacing port="sink_out 2" spacing="0"/>
+              <portSpacing port="sink_out 3" spacing="0"/>
+            </process>
+          </operator>
+          <operator activated="true" class="time_series:windowing" compatibility="9.6.000" expanded="true" height="82" name="Windowing (13)" width="90" x="313" y="289">
+            <parameter key="attribute_filter_type" value="all"/>
+            <parameter key="attribute" value="AvgGasPrice"/>
+            <parameter key="attributes" value=""/>
+            <parameter key="use_except_expression" value="false"/>
+            <parameter key="value_type" value="attribute_value"/>
+            <parameter key="use_value_type_exception" value="false"/>
+            <parameter key="except_value_type" value="time"/>
+            <parameter key="block_type" value="attribute_block"/>
+            <parameter key="use_block_type_exception" value="false"/>
+            <parameter key="except_block_type" value="value_matrix_row_start"/>
+            <parameter key="invert_selection" value="false"/>
+            <parameter key="include_special_attributes" value="false"/>
+            <parameter key="has_indices" value="true"/>
+            <parameter key="indices_attribute" value="Date(UTC)"/>
+            <parameter key="window_size" value="3"/>
+            <parameter key="no_overlapping_windows" value="false"/>
+            <parameter key="step_size" value="1"/>
+            <parameter key="create_horizon_(labels)" value="true"/>
+            <parameter key="horizon_attribute" value="Price"/>
+            <parameter key="horizon_size" value="1"/>
+            <parameter key="horizon_offset" value="0"/>
+          </operator>
+          <operator activated="true" class="time_series:windowing" compatibility="9.6.000" expanded="true" height="82" name="Windowing" width="90" x="179" y="34">
+            <parameter key="attribute_filter_type" value="all"/>
+            <parameter key="attribute" value="AvgGasPrice"/>
+            <parameter key="attributes" value=""/>
+            <parameter key="use_except_expression" value="false"/>
+            <parameter key="value_type" value="attribute_value"/>
+            <parameter key="use_value_type_exception" value="false"/>
+            <parameter key="except_value_type" value="time"/>
+            <parameter key="block_type" value="attribute_block"/>
+            <parameter key="use_block_type_exception" value="false"/>
+            <parameter key="except_block_type" value="value_matrix_row_start"/>
+            <parameter key="invert_selection" value="false"/>
+            <parameter key="include_special_attributes" value="false"/>
+            <parameter key="has_indices" value="true"/>
+            <parameter key="indices_attribute" value="Date(UTC)"/>
+            <parameter key="window_size" value="3"/>
+            <parameter key="no_overlapping_windows" value="false"/>
+            <parameter key="step_size" value="1"/>
+            <parameter key="create_horizon_(labels)" value="true"/>
+            <parameter key="horizon_attribute" value="Price"/>
+            <parameter key="horizon_size" value="1"/>
+            <parameter key="horizon_offset" value="0"/>
+          </operator>
+          <operator activated="true" class="multiply" compatibility="9.6.000" expanded="true" height="103" name="Multiply" width="90" x="313" y="34"/>
+          <operator activated="true" class="concurrency:optimize_parameters_grid" compatibility="9.6.000" expanded="true" height="124" name="Opt3" width="90" x="447" y="34">
+            <list key="parameters">
+              <parameter key="SVM.kernel_type" value="dot,radial,polynomial"/>
+              <parameter key="SVM.C" value="[0;1000;50;quadratic]"/>
+            </list>
+            <parameter key="error_handling" value="fail on error"/>
+            <parameter key="log_performance" value="true"/>
+            <parameter key="log_all_criteria" value="false"/>
+            <parameter key="synchronize" value="false"/>
+            <parameter key="enable_parallel_execution" value="true"/>
+            <process expanded="true">
+              <operator activated="true" class="time_series:sliding_window_validation" compatibility="9.6.000" expanded="true" height="145" name="Sliding Window Validation (2)" width="90" x="380" y="34">
+                <parameter key="has_indices" value="true"/>
+                <parameter key="indices_attribute" value="Last Date(UTC) in window"/>
+                <parameter key="training_window_size" value="90"/>
+                <parameter key="no_overlapping_windows" value="false"/>
+                <parameter key="step_size" value="30"/>
+                <parameter key="test_window_size" value="30"/>
+                <parameter key="enable_parallel_execution" value="true"/>
+                <process expanded="true">
+                  <operator activated="false" class="h2o:gradient_boosted_trees" compatibility="9.3.001" expanded="true" height="103" name="Gradient Boosted Trees" width="90" x="179" y="34">
+                    <parameter key="number_of_trees" value="100"/>
+                    <parameter key="reproducible" value="false"/>
+                    <parameter key="maximum_number_of_threads" value="4"/>
+                    <parameter key="use_local_random_seed" value="false"/>
+                    <parameter key="local_random_seed" value="1992"/>
+                    <parameter key="maximal_depth" value="10"/>
+                    <parameter key="min_rows" value="10.0"/>
+                    <parameter key="min_split_improvement" value="0.0"/>
+                    <parameter key="number_of_bins" value="20"/>
+                    <parameter key="learning_rate" value="0.01"/>
+                    <parameter key="sample_rate" value="1.0"/>
+                    <parameter key="distribution" value="AUTO"/>
+                    <parameter key="early_stopping" value="false"/>
+                    <parameter key="stopping_rounds" value="1"/>
+                    <parameter key="stopping_metric" value="AUTO"/>
+                    <parameter key="stopping_tolerance" value="0.001"/>
+                    <parameter key="max_runtime_seconds" value="0"/>
+                    <list key="expert_parameters"/>
+                  </operator>
+                  <operator activated="false" class="h2o:deep_learning" compatibility="9.3.001" expanded="true" height="82" name="Deep Learning" width="90" x="179" y="187">
+                    <parameter key="activation" value="RectifierWithDropout"/>
+                    <enumeration key="hidden_layer_sizes">
+                      <parameter key="hidden_layer_sizes" value="400"/>
+                      <parameter key="hidden_layer_sizes" value="400"/>
+                      <parameter key="hidden_layer_sizes" value="200"/>
+                      <parameter key="hidden_layer_sizes" value="100"/>
+                    </enumeration>
+                    <enumeration key="hidden_dropout_ratios">
+                      <parameter key="hidden_dropout_ratio" value="0.5"/>
+                      <parameter key="hidden_dropout_ratio" value="0.5"/>
+                      <parameter key="hidden_dropout_ratio" value="0.5"/>
+                      <parameter key="hidden_dropout_ratio" value="0.5"/>
+                    </enumeration>
+                    <parameter key="reproducible_(uses_1_thread)" value="false"/>
+                    <parameter key="use_local_random_seed" value="false"/>
+                    <parameter key="local_random_seed" value="1992"/>
+                    <parameter key="epochs" value="50.0"/>
+                    <parameter key="compute_variable_importances" value="false"/>
+                    <parameter key="train_samples_per_iteration" value="-2"/>
+                    <parameter key="adaptive_rate" value="true"/>
+                    <parameter key="epsilon" value="1.0E-8"/>
+                    <parameter key="rho" value="0.99"/>
+                    <parameter key="learning_rate" value="0.005"/>
+                    <parameter key="learning_rate_annealing" value="1.0E-6"/>
+                    <parameter key="learning_rate_decay" value="1.0"/>
+                    <parameter key="momentum_start" value="0.0"/>
+                    <parameter key="momentum_ramp" value="1000000.0"/>
+                    <parameter key="momentum_stable" value="0.0"/>
+                    <parameter key="nesterov_accelerated_gradient" value="true"/>
+                    <parameter key="standardize" value="true"/>
+                    <parameter key="L1" value="1.0E-5"/>
+                    <parameter key="L2" value="0.0"/>
+                    <parameter key="max_w2" value="10.0"/>
+                    <parameter key="loss_function" value="Automatic"/>
+                    <parameter key="distribution_function" value="AUTO"/>
+                    <parameter key="early_stopping" value="false"/>
+                    <parameter key="stopping_rounds" value="1"/>
+                    <parameter key="stopping_metric" value="AUTO"/>
+                    <parameter key="stopping_tolerance" value="0.001"/>
+                    <parameter key="missing_values_handling" value="MeanImputation"/>
+                    <parameter key="max_runtime_seconds" value="0"/>
+                    <list key="expert_parameters"/>
+                    <list key="expert_parameters_"/>
+                  </operator>
+                  <operator activated="true" class="support_vector_machine" compatibility="9.6.000" expanded="true" height="124" name="SVM" width="90" x="179" y="289">
+                    <parameter key="kernel_type" value="dot"/>
+                    <parameter key="kernel_gamma" value="1.0"/>
+                    <parameter key="kernel_sigma1" value="1.0"/>
+                    <parameter key="kernel_sigma2" value="0.0"/>
+                    <parameter key="kernel_sigma3" value="2.0"/>
+                    <parameter key="kernel_shift" value="1.0"/>
+                    <parameter key="kernel_degree" value="2.0"/>
+                    <parameter key="kernel_a" value="1.0"/>
+                    <parameter key="kernel_b" value="0.0"/>
+                    <parameter key="kernel_cache" value="200"/>
+                    <parameter key="C" value="0.0"/>
+                    <parameter key="convergence_epsilon" value="0.001"/>
+                    <parameter key="max_iterations" value="100000"/>
+                    <parameter key="scale" value="true"/>
+                    <parameter key="calculate_weights" value="true"/>
+                    <parameter key="return_optimization_performance" value="true"/>
+                    <parameter key="L_pos" value="1.0"/>
+                    <parameter key="L_neg" value="1.0"/>
+                    <parameter key="epsilon" value="0.0"/>
+                    <parameter key="epsilon_plus" value="0.0"/>
+                    <parameter key="epsilon_minus" value="0.0"/>
+                    <parameter key="balance_cost" value="false"/>
+                    <parameter key="quadratic_loss_pos" value="false"/>
+                    <parameter key="quadratic_loss_neg" value="false"/>
+                    <parameter key="estimate_performance" value="false"/>
+                  </operator>
+                  <connect from_port="training set" to_op="SVM" to_port="training set"/>
+                  <connect from_op="SVM" from_port="model" to_port="model"/>
+                  <portSpacing port="source_training set" spacing="0"/>
+                  <portSpacing port="sink_model" spacing="0"/>
+                  <portSpacing port="sink_through 1" spacing="0"/>
+                </process>
+                <process expanded="true">
+                  <operator activated="true" class="apply_model" compatibility="9.6.000" expanded="true" height="82" name="Apply Model" width="90" x="45" y="34">
+                    <list key="application_parameters"/>
+                    <parameter key="create_view" value="false"/>
+                  </operator>
+                  <operator activated="true" class="performance_regression" compatibility="9.6.000" expanded="true" height="82" name="Performance (Regression)" width="90" x="179" y="34">
+                    <parameter key="main_criterion" value="first"/>
+                    <parameter key="root_mean_squared_error" value="true"/>
+                    <parameter key="absolute_error" value="true"/>
+                    <parameter key="relative_error" value="true"/>
+                    <parameter key="relative_error_lenient" value="false"/>
+                    <parameter key="relative_error_strict" value="false"/>
+                    <parameter key="normalized_absolute_error" value="false"/>
+                    <parameter key="root_relative_squared_error" value="false"/>
+                    <parameter key="squared_error" value="false"/>
+                    <parameter key="correlation" value="true"/>
+                    <parameter key="squared_correlation" value="false"/>
+                    <parameter key="prediction_average" value="false"/>
+                    <parameter key="spearman_rho" value="false"/>
+                    <parameter key="kendall_tau" value="false"/>
+                    <parameter key="skip_undefined_labels" value="true"/>
+                    <parameter key="use_example_weights" value="true"/>
+                  </operator>
+                  <connect from_port="test set" to_op="Apply Model" to_port="unlabelled data"/>
+                  <connect from_port="model" to_op="Apply Model" to_port="model"/>
+                  <connect from_op="Apply Model" from_port="labelled data" to_op="Performance (Regression)" to_port="labelled data"/>
+                  <connect from_op="Performance (Regression)" from_port="performance" to_port="performance 1"/>
+                  <connect from_op="Performance (Regression)" from_port="example set" to_port="test set results"/>
+                  <portSpacing port="source_test set" spacing="0"/>
+                  <portSpacing port="source_model" spacing="0"/>
+                  <portSpacing port="source_through 1" spacing="0"/>
+                  <portSpacing port="sink_test set results" spacing="0"/>
+                  <portSpacing port="sink_performance 1" spacing="0"/>
+                  <portSpacing port="sink_performance 2" spacing="0"/>
+                </process>
+              </operator>
+              <connect from_port="input 1" to_op="Sliding Window Validation (2)" to_port="example set"/>
+              <connect from_op="Sliding Window Validation (2)" from_port="model" to_port="model"/>
+              <connect from_op="Sliding Window Validation (2)" from_port="performance 1" to_port="performance"/>
+              <portSpacing port="source_input 1" spacing="0"/>
+              <portSpacing port="source_input 2" spacing="0"/>
+              <portSpacing port="sink_performance" spacing="0"/>
+              <portSpacing port="sink_model" spacing="0"/>
+              <portSpacing port="sink_output 1" spacing="0"/>
+            </process>
+          </operator>
+          <operator activated="true" class="model_simulator:explain_predictions" compatibility="9.6.000" expanded="true" height="124" name="Pred3" width="90" x="447" y="289">
+            <parameter key="maximal explaining attributes" value="3"/>
+            <parameter key="local sample size" value="500"/>
+            <parameter key="only create predictions" value="false"/>
+            <parameter key="normalize global weights" value="false"/>
+            <parameter key="sort_weights" value="true"/>
+            <parameter key="sort_direction" value="descending"/>
+          </operator>
+          <operator activated="true" class="performance_regression" compatibility="9.6.000" expanded="true" height="82" name="Perf3" width="90" x="648" y="187">
+            <parameter key="main_criterion" value="first"/>
+            <parameter key="root_mean_squared_error" value="true"/>
+            <parameter key="absolute_error" value="true"/>
+            <parameter key="relative_error" value="true"/>
+            <parameter key="relative_error_lenient" value="false"/>
+            <parameter key="relative_error_strict" value="false"/>
+            <parameter key="normalized_absolute_error" value="false"/>
+            <parameter key="root_relative_squared_error" value="false"/>
+            <parameter key="squared_error" value="false"/>
+            <parameter key="correlation" value="true"/>
+            <parameter key="squared_correlation" value="false"/>
+            <parameter key="prediction_average" value="false"/>
+            <parameter key="spearman_rho" value="false"/>
+            <parameter key="kendall_tau" value="false"/>
+            <parameter key="skip_undefined_labels" value="true"/>
+            <parameter key="use_example_weights" value="true"/>
+          </operator>
+          <operator activated="true" class="write_as_text" compatibility="9.6.000" expanded="true" height="124" name="SVM_WindowSize3 Results" width="90" x="648" y="34">
+            <parameter key="result_file" value="D:\My문서\2019-2020 NYU PhD 1\Data Science\SVM_WindowSize3.res"/>
+            <parameter key="encoding" value="SYSTEM"/>
+          </operator>
+          <connect from_op="Split Data (3)" from_port="out 1" to_op="Windowing" to_port="example set"/>
+          <connect from_op="Split Data (3)" from_port="out 2" to_op="Windowing (13)" to_port="example set"/>
+          <connect from_op="Windowing (13)" from_port="windowed example set" to_op="Pred3" to_port="test data"/>
+          <connect from_op="Windowing" from_port="windowed example set" to_op="Multiply" to_port="input"/>
+          <connect from_op="Multiply" from_port="output 1" to_op="Opt3" to_port="input 1"/>
+          <connect from_op="Multiply" from_port="output 2" to_op="Pred3" to_port="training data"/>
+          <connect from_op="Opt3" from_port="model" to_op="Pred3" to_port="model"/>
+          <connect from_op="Opt3" from_port="parameter set" to_op="SVM_WindowSize3 Results" to_port="input 1"/>
+          <connect from_op="Pred3" from_port="example set output" to_op="Perf3" to_port="labelled data"/>
+          <connect from_op="Pred3" from_port="global weights output" to_op="SVM_WindowSize3 Results" to_port="input 2"/>
+          <connect from_op="Perf3" from_port="performance" to_op="SVM_WindowSize3 Results" to_port="input 3"/>
+          <connect from_op="SVM_WindowSize3 Results" from_port="input 1" to_port="out 1"/>
+          <connect from_op="SVM_WindowSize3 Results" from_port="input 2" to_port="out 2"/>
+          <connect from_op="SVM_WindowSize3 Results" from_port="input 3" to_port="out 3"/>
+          <portSpacing port="source_in 1" spacing="0"/>
+          <portSpacing port="sink_out 1" spacing="0"/>
+          <portSpacing port="sink_out 2" spacing="0"/>
+          <portSpacing port="sink_out 3" spacing="0"/>
+          <portSpacing port="sink_out 4" spacing="0"/>
+        </process>
+      </operator>
+      <operator activated="true" class="subprocess" compatibility="9.6.000" expanded="true" height="124" name="SVM_WindowSize7" width="90" x="313" y="85">
+        <process expanded="true">
+          <operator activated="true" class="subprocess" compatibility="9.6.000" expanded="true" height="103" name="Split Data (4)" width="90" x="45" y="34">
+            <process expanded="true">
+              <operator activated="true" class="retrieve" compatibility="9.6.000" expanded="true" height="68" name="Retrieve res_timeseries20190101_20200324 (4)" width="90" x="45" y="34">
+                <parameter key="repository_entry" value="../data/res_timeseries20190101_20200324"/>
+              </operator>
+              <operator activated="true" class="filter_example_range" compatibility="9.6.000" expanded="true" height="82" name="Filter Example Range (7)" width="90" x="179" y="34">
+                <parameter key="first_example" value="1"/>
+                <parameter key="last_example" value="365"/>
+                <parameter key="invert_filter" value="false"/>
+              </operator>
+              <operator activated="true" class="filter_example_range" compatibility="9.6.000" expanded="true" height="82" name="Filter Example Range (8)" width="90" x="313" y="187">
+                <parameter key="first_example" value="1"/>
+                <parameter key="last_example" value="365"/>
+                <parameter key="invert_filter" value="true"/>
+              </operator>
+              <connect from_op="Retrieve res_timeseries20190101_20200324 (4)" from_port="output" to_op="Filter Example Range (7)" to_port="example set input"/>
+              <connect from_op="Filter Example Range (7)" from_port="example set output" to_port="out 1"/>
+              <connect from_op="Filter Example Range (7)" from_port="original" to_op="Filter Example Range (8)" to_port="example set input"/>
+              <connect from_op="Filter Example Range (8)" from_port="example set output" to_port="out 2"/>
+              <portSpacing port="source_in 1" spacing="0"/>
+              <portSpacing port="sink_out 1" spacing="0"/>
+              <portSpacing port="sink_out 2" spacing="0"/>
+              <portSpacing port="sink_out 3" spacing="0"/>
+            </process>
+          </operator>
+          <operator activated="true" class="time_series:windowing" compatibility="9.6.000" expanded="true" height="82" name="Windowing (14)" width="90" x="313" y="289">
+            <parameter key="attribute_filter_type" value="all"/>
+            <parameter key="attribute" value="AvgGasPrice"/>
+            <parameter key="attributes" value=""/>
+            <parameter key="use_except_expression" value="false"/>
+            <parameter key="value_type" value="attribute_value"/>
+            <parameter key="use_value_type_exception" value="false"/>
+            <parameter key="except_value_type" value="time"/>
+            <parameter key="block_type" value="attribute_block"/>
+            <parameter key="use_block_type_exception" value="false"/>
+            <parameter key="except_block_type" value="value_matrix_row_start"/>
+            <parameter key="invert_selection" value="false"/>
+            <parameter key="include_special_attributes" value="false"/>
+            <parameter key="has_indices" value="true"/>
+            <parameter key="indices_attribute" value="Date(UTC)"/>
+            <parameter key="window_size" value="7"/>
+            <parameter key="no_overlapping_windows" value="false"/>
+            <parameter key="step_size" value="1"/>
+            <parameter key="create_horizon_(labels)" value="true"/>
+            <parameter key="horizon_attribute" value="Price"/>
+            <parameter key="horizon_size" value="1"/>
+            <parameter key="horizon_offset" value="0"/>
+          </operator>
+          <operator activated="true" class="time_series:windowing" compatibility="9.6.000" expanded="true" height="82" name="Windowing (2)" width="90" x="179" y="34">
+            <parameter key="attribute_filter_type" value="all"/>
+            <parameter key="attribute" value="AvgGasPrice"/>
+            <parameter key="attributes" value=""/>
+            <parameter key="use_except_expression" value="false"/>
+            <parameter key="value_type" value="attribute_value"/>
+            <parameter key="use_value_type_exception" value="false"/>
+            <parameter key="except_value_type" value="time"/>
+            <parameter key="block_type" value="attribute_block"/>
+            <parameter key="use_block_type_exception" value="false"/>
+            <parameter key="except_block_type" value="value_matrix_row_start"/>
+            <parameter key="invert_selection" value="false"/>
+            <parameter key="include_special_attributes" value="false"/>
+            <parameter key="has_indices" value="true"/>
+            <parameter key="indices_attribute" value="Date(UTC)"/>
+            <parameter key="window_size" value="7"/>
+            <parameter key="no_overlapping_windows" value="false"/>
+            <parameter key="step_size" value="1"/>
+            <parameter key="create_horizon_(labels)" value="true"/>
+            <parameter key="horizon_attribute" value="Price"/>
+            <parameter key="horizon_size" value="1"/>
+            <parameter key="horizon_offset" value="0"/>
+          </operator>
+          <operator activated="true" class="multiply" compatibility="9.6.000" expanded="true" height="103" name="Multiply (2)" width="90" x="313" y="34"/>
+          <operator activated="true" class="concurrency:optimize_parameters_grid" compatibility="9.6.000" expanded="true" height="124" name="Opt7" width="90" x="447" y="34">
+            <list key="parameters">
+              <parameter key="SVM (3).kernel_type" value="dot,radial,polynomial"/>
+              <parameter key="SVM (3).C" value="[0;1000;50;quadratic]"/>
+            </list>
+            <parameter key="error_handling" value="fail on error"/>
+            <parameter key="log_performance" value="true"/>
+            <parameter key="log_all_criteria" value="false"/>
+            <parameter key="synchronize" value="false"/>
+            <parameter key="enable_parallel_execution" value="true"/>
+            <process expanded="true">
+              <operator activated="true" class="time_series:sliding_window_validation" compatibility="9.6.000" expanded="true" height="145" name="Sliding Window Validation (3)" width="90" x="380" y="34">
+                <parameter key="has_indices" value="true"/>
+                <parameter key="indices_attribute" value="Last Date(UTC) in window"/>
+                <parameter key="training_window_size" value="90"/>
+                <parameter key="no_overlapping_windows" value="false"/>
+                <parameter key="step_size" value="30"/>
+                <parameter key="test_window_size" value="30"/>
+                <parameter key="enable_parallel_execution" value="true"/>
+                <process expanded="true">
+                  <operator activated="false" class="h2o:gradient_boosted_trees" compatibility="9.3.001" expanded="true" height="103" name="Gradient Boosted Trees (3)" width="90" x="179" y="34">
+                    <parameter key="number_of_trees" value="100"/>
+                    <parameter key="reproducible" value="false"/>
+                    <parameter key="maximum_number_of_threads" value="4"/>
+                    <parameter key="use_local_random_seed" value="false"/>
+                    <parameter key="local_random_seed" value="1992"/>
+                    <parameter key="maximal_depth" value="10"/>
+                    <parameter key="min_rows" value="10.0"/>
+                    <parameter key="min_split_improvement" value="0.0"/>
+                    <parameter key="number_of_bins" value="20"/>
+                    <parameter key="learning_rate" value="0.01"/>
+                    <parameter key="sample_rate" value="1.0"/>
+                    <parameter key="distribution" value="AUTO"/>
+                    <parameter key="early_stopping" value="false"/>
+                    <parameter key="stopping_rounds" value="1"/>
+                    <parameter key="stopping_metric" value="AUTO"/>
+                    <parameter key="stopping_tolerance" value="0.001"/>
+                    <parameter key="max_runtime_seconds" value="0"/>
+                    <list key="expert_parameters"/>
+                  </operator>
+                  <operator activated="false" class="h2o:deep_learning" compatibility="9.3.001" expanded="true" height="82" name="Deep Learning (3)" width="90" x="179" y="187">
+                    <parameter key="activation" value="RectifierWithDropout"/>
+                    <enumeration key="hidden_layer_sizes">
+                      <parameter key="hidden_layer_sizes" value="400"/>
+                      <parameter key="hidden_layer_sizes" value="400"/>
+                      <parameter key="hidden_layer_sizes" value="200"/>
+                      <parameter key="hidden_layer_sizes" value="100"/>
+                    </enumeration>
+                    <enumeration key="hidden_dropout_ratios">
+                      <parameter key="hidden_dropout_ratio" value="0.5"/>
+                      <parameter key="hidden_dropout_ratio" value="0.5"/>
+                      <parameter key="hidden_dropout_ratio" value="0.5"/>
+                      <parameter key="hidden_dropout_ratio" value="0.5"/>
+                    </enumeration>
+                    <parameter key="reproducible_(uses_1_thread)" value="false"/>
+                    <parameter key="use_local_random_seed" value="false"/>
+                    <parameter key="local_random_seed" value="1992"/>
+                    <parameter key="epochs" value="50.0"/>
+                    <parameter key="compute_variable_importances" value="false"/>
+                    <parameter key="train_samples_per_iteration" value="-2"/>
+                    <parameter key="adaptive_rate" value="true"/>
+                    <parameter key="epsilon" value="1.0E-8"/>
+                    <parameter key="rho" value="0.99"/>
+                    <parameter key="learning_rate" value="0.005"/>
+                    <parameter key="learning_rate_annealing" value="1.0E-6"/>
+                    <parameter key="learning_rate_decay" value="1.0"/>
+                    <parameter key="momentum_start" value="0.0"/>
+                    <parameter key="momentum_ramp" value="1000000.0"/>
+                    <parameter key="momentum_stable" value="0.0"/>
+                    <parameter key="nesterov_accelerated_gradient" value="true"/>
+                    <parameter key="standardize" value="true"/>
+                    <parameter key="L1" value="1.0E-5"/>
+                    <parameter key="L2" value="0.0"/>
+                    <parameter key="max_w2" value="10.0"/>
+                    <parameter key="loss_function" value="Automatic"/>
+                    <parameter key="distribution_function" value="AUTO"/>
+                    <parameter key="early_stopping" value="false"/>
+                    <parameter key="stopping_rounds" value="1"/>
+                    <parameter key="stopping_metric" value="AUTO"/>
+                    <parameter key="stopping_tolerance" value="0.001"/>
+                    <parameter key="missing_values_handling" value="MeanImputation"/>
+                    <parameter key="max_runtime_seconds" value="0"/>
+                    <list key="expert_parameters"/>
+                    <list key="expert_parameters_"/>
+                  </operator>
+                  <operator activated="true" class="support_vector_machine" compatibility="9.6.000" expanded="true" height="124" name="SVM (3)" width="90" x="179" y="289">
+                    <parameter key="kernel_type" value="dot"/>
+                    <parameter key="kernel_gamma" value="1.0"/>
+                    <parameter key="kernel_sigma1" value="1.0"/>
+                    <parameter key="kernel_sigma2" value="0.0"/>
+                    <parameter key="kernel_sigma3" value="2.0"/>
+                    <parameter key="kernel_shift" value="1.0"/>
+                    <parameter key="kernel_degree" value="2.0"/>
+                    <parameter key="kernel_a" value="1.0"/>
+                    <parameter key="kernel_b" value="0.0"/>
+                    <parameter key="kernel_cache" value="200"/>
+                    <parameter key="C" value="0.0"/>
+                    <parameter key="convergence_epsilon" value="0.001"/>
+                    <parameter key="max_iterations" value="100000"/>
+                    <parameter key="scale" value="true"/>
+                    <parameter key="calculate_weights" value="true"/>
+                    <parameter key="return_optimization_performance" value="true"/>
+                    <parameter key="L_pos" value="1.0"/>
+                    <parameter key="L_neg" value="1.0"/>
+                    <parameter key="epsilon" value="0.0"/>
+                    <parameter key="epsilon_plus" value="0.0"/>
+                    <parameter key="epsilon_minus" value="0.0"/>
+                    <parameter key="balance_cost" value="false"/>
+                    <parameter key="quadratic_loss_pos" value="false"/>
+                    <parameter key="quadratic_loss_neg" value="false"/>
+                    <parameter key="estimate_performance" value="false"/>
+                  </operator>
+                  <connect from_port="training set" to_op="SVM (3)" to_port="training set"/>
+                  <connect from_op="SVM (3)" from_port="model" to_port="model"/>
+                  <portSpacing port="source_training set" spacing="0"/>
+                  <portSpacing port="sink_model" spacing="0"/>
+                  <portSpacing port="sink_through 1" spacing="0"/>
+                </process>
+                <process expanded="true">
+                  <operator activated="true" class="apply_model" compatibility="9.6.000" expanded="true" height="82" name="Apply Model (3)" width="90" x="45" y="34">
+                    <list key="application_parameters"/>
+                    <parameter key="create_view" value="false"/>
+                  </operator>
+                  <operator activated="true" class="performance_regression" compatibility="9.6.000" expanded="true" height="82" name="Performance (Regression) (3)" width="90" x="179" y="34">
+                    <parameter key="main_criterion" value="first"/>
+                    <parameter key="root_mean_squared_error" value="true"/>
+                    <parameter key="absolute_error" value="true"/>
+                    <parameter key="relative_error" value="true"/>
+                    <parameter key="relative_error_lenient" value="false"/>
+                    <parameter key="relative_error_strict" value="false"/>
+                    <parameter key="normalized_absolute_error" value="false"/>
+                    <parameter key="root_relative_squared_error" value="false"/>
+                    <parameter key="squared_error" value="false"/>
+                    <parameter key="correlation" value="true"/>
+                    <parameter key="squared_correlation" value="false"/>
+                    <parameter key="prediction_average" value="false"/>
+                    <parameter key="spearman_rho" value="false"/>
+                    <parameter key="kendall_tau" value="false"/>
+                    <parameter key="skip_undefined_labels" value="true"/>
+                    <parameter key="use_example_weights" value="true"/>
+                  </operator>
+                  <connect from_port="test set" to_op="Apply Model (3)" to_port="unlabelled data"/>
+                  <connect from_port="model" to_op="Apply Model (3)" to_port="model"/>
+                  <connect from_op="Apply Model (3)" from_port="labelled data" to_op="Performance (Regression) (3)" to_port="labelled data"/>
+                  <connect from_op="Performance (Regression) (3)" from_port="performance" to_port="performance 1"/>
+                  <connect from_op="Performance (Regression) (3)" from_port="example set" to_port="test set results"/>
+                  <portSpacing port="source_test set" spacing="0"/>
+                  <portSpacing port="source_model" spacing="0"/>
+                  <portSpacing port="source_through 1" spacing="0"/>
+                  <portSpacing port="sink_test set results" spacing="0"/>
+                  <portSpacing port="sink_performance 1" spacing="0"/>
+                  <portSpacing port="sink_performance 2" spacing="0"/>
+                </process>
+              </operator>
+              <connect from_port="input 1" to_op="Sliding Window Validation (3)" to_port="example set"/>
+              <connect from_op="Sliding Window Validation (3)" from_port="model" to_port="model"/>
+              <connect from_op="Sliding Window Validation (3)" from_port="performance 1" to_port="performance"/>
+              <portSpacing port="source_input 1" spacing="0"/>
+              <portSpacing port="source_input 2" spacing="0"/>
+              <portSpacing port="sink_performance" spacing="0"/>
+              <portSpacing port="sink_model" spacing="0"/>
+              <portSpacing port="sink_output 1" spacing="0"/>
+            </process>
+          </operator>
+          <operator activated="true" class="model_simulator:explain_predictions" compatibility="9.6.000" expanded="true" height="124" name="Pred7" width="90" x="447" y="289">
+            <parameter key="maximal explaining attributes" value="3"/>
+            <parameter key="local sample size" value="500"/>
+            <parameter key="only create predictions" value="false"/>
+            <parameter key="normalize global weights" value="false"/>
+            <parameter key="sort_weights" value="true"/>
+            <parameter key="sort_direction" value="descending"/>
+          </operator>
+          <operator activated="true" class="performance_regression" compatibility="9.6.000" expanded="true" height="82" name="Perf7" width="90" x="648" y="187">
+            <parameter key="main_criterion" value="first"/>
+            <parameter key="root_mean_squared_error" value="true"/>
+            <parameter key="absolute_error" value="true"/>
+            <parameter key="relative_error" value="true"/>
+            <parameter key="relative_error_lenient" value="false"/>
+            <parameter key="relative_error_strict" value="false"/>
+            <parameter key="normalized_absolute_error" value="false"/>
+            <parameter key="root_relative_squared_error" value="false"/>
+            <parameter key="squared_error" value="false"/>
+            <parameter key="correlation" value="true"/>
+            <parameter key="squared_correlation" value="false"/>
+            <parameter key="prediction_average" value="false"/>
+            <parameter key="spearman_rho" value="false"/>
+            <parameter key="kendall_tau" value="false"/>
+            <parameter key="skip_undefined_labels" value="true"/>
+            <parameter key="use_example_weights" value="true"/>
+          </operator>
+          <operator activated="true" class="write_as_text" compatibility="9.6.000" expanded="true" height="124" name="SVM_WindowSize7 Results" width="90" x="648" y="34">
+            <parameter key="result_file" value="D:\My문서\2019-2020 NYU PhD 1\Data Science\SVM_WindowSize7.res"/>
+            <parameter key="encoding" value="SYSTEM"/>
+          </operator>
+          <connect from_op="Split Data (4)" from_port="out 1" to_op="Windowing (2)" to_port="example set"/>
+          <connect from_op="Split Data (4)" from_port="out 2" to_op="Windowing (14)" to_port="example set"/>
+          <connect from_op="Windowing (14)" from_port="windowed example set" to_op="Pred7" to_port="test data"/>
+          <connect from_op="Windowing (2)" from_port="windowed example set" to_op="Multiply (2)" to_port="input"/>
+          <connect from_op="Multiply (2)" from_port="output 1" to_op="Opt7" to_port="input 1"/>
+          <connect from_op="Multiply (2)" from_port="output 2" to_op="Pred7" to_port="training data"/>
+          <connect from_op="Opt7" from_port="model" to_op="Pred7" to_port="model"/>
+          <connect from_op="Opt7" from_port="parameter set" to_op="SVM_WindowSize7 Results" to_port="input 1"/>
+          <connect from_op="Pred7" from_port="example set output" to_op="Perf7" to_port="labelled data"/>
+          <connect from_op="Pred7" from_port="global weights output" to_op="SVM_WindowSize7 Results" to_port="input 2"/>
+          <connect from_op="Perf7" from_port="performance" to_op="SVM_WindowSize7 Results" to_port="input 3"/>
+          <connect from_op="SVM_WindowSize7 Results" from_port="input 1" to_port="out 1"/>
+          <connect from_op="SVM_WindowSize7 Results" from_port="input 2" to_port="out 2"/>
+          <connect from_op="SVM_WindowSize7 Results" from_port="input 3" to_port="out 3"/>
+          <portSpacing port="source_in 1" spacing="0"/>
+          <portSpacing port="sink_out 1" spacing="0"/>
+          <portSpacing port="sink_out 2" spacing="0"/>
+          <portSpacing port="sink_out 3" spacing="0"/>
+          <portSpacing port="sink_out 4" spacing="0"/>
+        </process>
+      </operator>
+      <operator activated="true" class="subprocess" compatibility="9.6.000" expanded="true" height="124" name="SVM_WindowSize10" width="90" x="313" y="238">
+        <process expanded="true">
+          <operator activated="true" class="subprocess" compatibility="9.6.000" expanded="true" height="103" name="Split Data (5)" width="90" x="45" y="34">
+            <process expanded="true">
+              <operator activated="true" class="retrieve" compatibility="9.6.000" expanded="true" height="68" name="Retrieve res_timeseries20190101_20200324 (5)" width="90" x="45" y="34">
+                <parameter key="repository_entry" value="../data/res_timeseries20190101_20200324"/>
+              </operator>
+              <operator activated="true" class="filter_example_range" compatibility="9.6.000" expanded="true" height="82" name="Filter Example Range (9)" width="90" x="179" y="34">
+                <parameter key="first_example" value="1"/>
+                <parameter key="last_example" value="365"/>
+                <parameter key="invert_filter" value="false"/>
+              </operator>
+              <operator activated="true" class="filter_example_range" compatibility="9.6.000" expanded="true" height="82" name="Filter Example Range (10)" width="90" x="313" y="187">
+                <parameter key="first_example" value="1"/>
+                <parameter key="last_example" value="365"/>
+                <parameter key="invert_filter" value="true"/>
+              </operator>
+              <connect from_op="Retrieve res_timeseries20190101_20200324 (5)" from_port="output" to_op="Filter Example Range (9)" to_port="example set input"/>
+              <connect from_op="Filter Example Range (9)" from_port="example set output" to_port="out 1"/>
+              <connect from_op="Filter Example Range (9)" from_port="original" to_op="Filter Example Range (10)" to_port="example set input"/>
+              <connect from_op="Filter Example Range (10)" from_port="example set output" to_port="out 2"/>
+              <portSpacing port="source_in 1" spacing="0"/>
+              <portSpacing port="sink_out 1" spacing="0"/>
+              <portSpacing port="sink_out 2" spacing="0"/>
+              <portSpacing port="sink_out 3" spacing="0"/>
+            </process>
+          </operator>
+          <operator activated="true" class="time_series:windowing" compatibility="9.6.000" expanded="true" height="82" name="Windowing (15)" width="90" x="313" y="289">
+            <parameter key="attribute_filter_type" value="all"/>
+            <parameter key="attribute" value="AvgGasPrice"/>
+            <parameter key="attributes" value=""/>
+            <parameter key="use_except_expression" value="false"/>
+            <parameter key="value_type" value="attribute_value"/>
+            <parameter key="use_value_type_exception" value="false"/>
+            <parameter key="except_value_type" value="time"/>
+            <parameter key="block_type" value="attribute_block"/>
+            <parameter key="use_block_type_exception" value="false"/>
+            <parameter key="except_block_type" value="value_matrix_row_start"/>
+            <parameter key="invert_selection" value="false"/>
+            <parameter key="include_special_attributes" value="false"/>
+            <parameter key="has_indices" value="true"/>
+            <parameter key="indices_attribute" value="Date(UTC)"/>
+            <parameter key="window_size" value="10"/>
+            <parameter key="no_overlapping_windows" value="false"/>
+            <parameter key="step_size" value="1"/>
+            <parameter key="create_horizon_(labels)" value="true"/>
+            <parameter key="horizon_attribute" value="Price"/>
+            <parameter key="horizon_size" value="1"/>
+            <parameter key="horizon_offset" value="0"/>
+          </operator>
+          <operator activated="true" class="time_series:windowing" compatibility="9.6.000" expanded="true" height="82" name="Windowing (5)" width="90" x="179" y="34">
+            <parameter key="attribute_filter_type" value="all"/>
+            <parameter key="attribute" value="AvgGasPrice"/>
+            <parameter key="attributes" value=""/>
+            <parameter key="use_except_expression" value="false"/>
+            <parameter key="value_type" value="attribute_value"/>
+            <parameter key="use_value_type_exception" value="false"/>
+            <parameter key="except_value_type" value="time"/>
+            <parameter key="block_type" value="attribute_block"/>
+            <parameter key="use_block_type_exception" value="false"/>
+            <parameter key="except_block_type" value="value_matrix_row_start"/>
+            <parameter key="invert_selection" value="false"/>
+            <parameter key="include_special_attributes" value="false"/>
+            <parameter key="has_indices" value="true"/>
+            <parameter key="indices_attribute" value="Date(UTC)"/>
+            <parameter key="window_size" value="10"/>
+            <parameter key="no_overlapping_windows" value="false"/>
+            <parameter key="step_size" value="1"/>
+            <parameter key="create_horizon_(labels)" value="true"/>
+            <parameter key="horizon_attribute" value="Price"/>
+            <parameter key="horizon_size" value="1"/>
+            <parameter key="horizon_offset" value="0"/>
+          </operator>
+          <operator activated="true" class="multiply" compatibility="9.6.000" expanded="true" height="103" name="Multiply (5)" width="90" x="313" y="34"/>
+          <operator activated="true" class="concurrency:optimize_parameters_grid" compatibility="9.6.000" expanded="true" height="124" name="Opt10" width="90" x="447" y="34">
+            <list key="parameters">
+              <parameter key="SVM (4).kernel_type" value="dot,radial,polynomial"/>
+              <parameter key="SVM (4).C" value="[0;1000;50;quadratic]"/>
+            </list>
+            <parameter key="error_handling" value="fail on error"/>
+            <parameter key="log_performance" value="true"/>
+            <parameter key="log_all_criteria" value="false"/>
+            <parameter key="synchronize" value="false"/>
+            <parameter key="enable_parallel_execution" value="true"/>
+            <process expanded="true">
+              <operator activated="true" class="time_series:sliding_window_validation" compatibility="9.6.000" expanded="true" height="145" name="Sliding Window Validation (4)" width="90" x="380" y="34">
+                <parameter key="has_indices" value="true"/>
+                <parameter key="indices_attribute" value="Last Date(UTC) in window"/>
+                <parameter key="training_window_size" value="90"/>
+                <parameter key="no_overlapping_windows" value="false"/>
+                <parameter key="step_size" value="30"/>
+                <parameter key="test_window_size" value="30"/>
+                <parameter key="enable_parallel_execution" value="true"/>
+                <process expanded="true">
+                  <operator activated="false" class="h2o:gradient_boosted_trees" compatibility="9.3.001" expanded="true" height="103" name="Gradient Boosted Trees (4)" width="90" x="179" y="34">
+                    <parameter key="number_of_trees" value="100"/>
+                    <parameter key="reproducible" value="false"/>
+                    <parameter key="maximum_number_of_threads" value="4"/>
+                    <parameter key="use_local_random_seed" value="false"/>
+                    <parameter key="local_random_seed" value="1992"/>
+                    <parameter key="maximal_depth" value="10"/>
+                    <parameter key="min_rows" value="10.0"/>
+                    <parameter key="min_split_improvement" value="0.0"/>
+                    <parameter key="number_of_bins" value="20"/>
+                    <parameter key="learning_rate" value="0.01"/>
+                    <parameter key="sample_rate" value="1.0"/>
+                    <parameter key="distribution" value="AUTO"/>
+                    <parameter key="early_stopping" value="false"/>
+                    <parameter key="stopping_rounds" value="1"/>
+                    <parameter key="stopping_metric" value="AUTO"/>
+                    <parameter key="stopping_tolerance" value="0.001"/>
+                    <parameter key="max_runtime_seconds" value="0"/>
+                    <list key="expert_parameters"/>
+                  </operator>
+                  <operator activated="false" class="h2o:deep_learning" compatibility="9.3.001" expanded="true" height="82" name="Deep Learning (4)" width="90" x="179" y="187">
+                    <parameter key="activation" value="RectifierWithDropout"/>
+                    <enumeration key="hidden_layer_sizes">
+                      <parameter key="hidden_layer_sizes" value="400"/>
+                      <parameter key="hidden_layer_sizes" value="400"/>
+                      <parameter key="hidden_layer_sizes" value="200"/>
+                      <parameter key="hidden_layer_sizes" value="100"/>
+                    </enumeration>
+                    <enumeration key="hidden_dropout_ratios">
+                      <parameter key="hidden_dropout_ratio" value="0.5"/>
+                      <parameter key="hidden_dropout_ratio" value="0.5"/>
+                      <parameter key="hidden_dropout_ratio" value="0.5"/>
+                      <parameter key="hidden_dropout_ratio" value="0.5"/>
+                    </enumeration>
+                    <parameter key="reproducible_(uses_1_thread)" value="false"/>
+                    <parameter key="use_local_random_seed" value="false"/>
+                    <parameter key="local_random_seed" value="1992"/>
+                    <parameter key="epochs" value="50.0"/>
+                    <parameter key="compute_variable_importances" value="false"/>
+                    <parameter key="train_samples_per_iteration" value="-2"/>
+                    <parameter key="adaptive_rate" value="true"/>
+                    <parameter key="epsilon" value="1.0E-8"/>
+                    <parameter key="rho" value="0.99"/>
+                    <parameter key="learning_rate" value="0.005"/>
+                    <parameter key="learning_rate_annealing" value="1.0E-6"/>
+                    <parameter key="learning_rate_decay" value="1.0"/>
+                    <parameter key="momentum_start" value="0.0"/>
+                    <parameter key="momentum_ramp" value="1000000.0"/>
+                    <parameter key="momentum_stable" value="0.0"/>
+                    <parameter key="nesterov_accelerated_gradient" value="true"/>
+                    <parameter key="standardize" value="true"/>
+                    <parameter key="L1" value="1.0E-5"/>
+                    <parameter key="L2" value="0.0"/>
+                    <parameter key="max_w2" value="10.0"/>
+                    <parameter key="loss_function" value="Automatic"/>
+                    <parameter key="distribution_function" value="AUTO"/>
+                    <parameter key="early_stopping" value="false"/>
+                    <parameter key="stopping_rounds" value="1"/>
+                    <parameter key="stopping_metric" value="AUTO"/>
+                    <parameter key="stopping_tolerance" value="0.001"/>
+                    <parameter key="missing_values_handling" value="MeanImputation"/>
+                    <parameter key="max_runtime_seconds" value="0"/>
+                    <list key="expert_parameters"/>
+                    <list key="expert_parameters_"/>
+                  </operator>
+                  <operator activated="true" class="support_vector_machine" compatibility="9.6.000" expanded="true" height="124" name="SVM (4)" width="90" x="179" y="289">
+                    <parameter key="kernel_type" value="dot"/>
+                    <parameter key="kernel_gamma" value="1.0"/>
+                    <parameter key="kernel_sigma1" value="1.0"/>
+                    <parameter key="kernel_sigma2" value="0.0"/>
+                    <parameter key="kernel_sigma3" value="2.0"/>
+                    <parameter key="kernel_shift" value="1.0"/>
+                    <parameter key="kernel_degree" value="2.0"/>
+                    <parameter key="kernel_a" value="1.0"/>
+                    <parameter key="kernel_b" value="0.0"/>
+                    <parameter key="kernel_cache" value="200"/>
+                    <parameter key="C" value="0.0"/>
+                    <parameter key="convergence_epsilon" value="0.001"/>
+                    <parameter key="max_iterations" value="100000"/>
+                    <parameter key="scale" value="true"/>
+                    <parameter key="calculate_weights" value="true"/>
+                    <parameter key="return_optimization_performance" value="true"/>
+                    <parameter key="L_pos" value="1.0"/>
+                    <parameter key="L_neg" value="1.0"/>
+                    <parameter key="epsilon" value="0.0"/>
+                    <parameter key="epsilon_plus" value="0.0"/>
+                    <parameter key="epsilon_minus" value="0.0"/>
+                    <parameter key="balance_cost" value="false"/>
+                    <parameter key="quadratic_loss_pos" value="false"/>
+                    <parameter key="quadratic_loss_neg" value="false"/>
+                    <parameter key="estimate_performance" value="false"/>
+                  </operator>
+                  <connect from_port="training set" to_op="SVM (4)" to_port="training set"/>
+                  <connect from_op="SVM (4)" from_port="model" to_port="model"/>
+                  <portSpacing port="source_training set" spacing="0"/>
+                  <portSpacing port="sink_model" spacing="0"/>
+                  <portSpacing port="sink_through 1" spacing="0"/>
+                </process>
+                <process expanded="true">
+                  <operator activated="true" class="apply_model" compatibility="9.6.000" expanded="true" height="82" name="Apply Model (4)" width="90" x="45" y="34">
+                    <list key="application_parameters"/>
+                    <parameter key="create_view" value="false"/>
+                  </operator>
+                  <operator activated="true" class="performance_regression" compatibility="9.6.000" expanded="true" height="82" name="Performance (Regression) (4)" width="90" x="179" y="34">
+                    <parameter key="main_criterion" value="first"/>
+                    <parameter key="root_mean_squared_error" value="true"/>
+                    <parameter key="absolute_error" value="true"/>
+                    <parameter key="relative_error" value="true"/>
+                    <parameter key="relative_error_lenient" value="false"/>
+                    <parameter key="relative_error_strict" value="false"/>
+                    <parameter key="normalized_absolute_error" value="false"/>
+                    <parameter key="root_relative_squared_error" value="false"/>
+                    <parameter key="squared_error" value="false"/>
+                    <parameter key="correlation" value="true"/>
+                    <parameter key="squared_correlation" value="false"/>
+                    <parameter key="prediction_average" value="false"/>
+                    <parameter key="spearman_rho" value="false"/>
+                    <parameter key="kendall_tau" value="false"/>
+                    <parameter key="skip_undefined_labels" value="true"/>
+                    <parameter key="use_example_weights" value="true"/>
+                  </operator>
+                  <connect from_port="test set" to_op="Apply Model (4)" to_port="unlabelled data"/>
+                  <connect from_port="model" to_op="Apply Model (4)" to_port="model"/>
+                  <connect from_op="Apply Model (4)" from_port="labelled data" to_op="Performance (Regression) (4)" to_port="labelled data"/>
+                  <connect from_op="Performance (Regression) (4)" from_port="performance" to_port="performance 1"/>
+                  <connect from_op="Performance (Regression) (4)" from_port="example set" to_port="test set results"/>
+                  <portSpacing port="source_test set" spacing="0"/>
+                  <portSpacing port="source_model" spacing="0"/>
+                  <portSpacing port="source_through 1" spacing="0"/>
+                  <portSpacing port="sink_test set results" spacing="0"/>
+                  <portSpacing port="sink_performance 1" spacing="0"/>
+                  <portSpacing port="sink_performance 2" spacing="0"/>
+                </process>
+              </operator>
+              <connect from_port="input 1" to_op="Sliding Window Validation (4)" to_port="example set"/>
+              <connect from_op="Sliding Window Validation (4)" from_port="model" to_port="model"/>
+              <connect from_op="Sliding Window Validation (4)" from_port="performance 1" to_port="performance"/>
+              <portSpacing port="source_input 1" spacing="0"/>
+              <portSpacing port="source_input 2" spacing="0"/>
+              <portSpacing port="sink_performance" spacing="0"/>
+              <portSpacing port="sink_model" spacing="0"/>
+              <portSpacing port="sink_output 1" spacing="0"/>
+            </process>
+          </operator>
+          <operator activated="true" class="model_simulator:explain_predictions" compatibility="9.6.000" expanded="true" height="124" name="Pred10" width="90" x="447" y="289">
+            <parameter key="maximal explaining attributes" value="3"/>
+            <parameter key="local sample size" value="500"/>
+            <parameter key="only create predictions" value="false"/>
+            <parameter key="normalize global weights" value="false"/>
+            <parameter key="sort_weights" value="true"/>
+            <parameter key="sort_direction" value="descending"/>
+          </operator>
+          <operator activated="true" class="performance_regression" compatibility="9.6.000" expanded="true" height="82" name="Perf10" width="90" x="648" y="187">
+            <parameter key="main_criterion" value="first"/>
+            <parameter key="root_mean_squared_error" value="true"/>
+            <parameter key="absolute_error" value="true"/>
+            <parameter key="relative_error" value="true"/>
+            <parameter key="relative_error_lenient" value="false"/>
+            <parameter key="relative_error_strict" value="false"/>
+            <parameter key="normalized_absolute_error" value="false"/>
+            <parameter key="root_relative_squared_error" value="false"/>
+            <parameter key="squared_error" value="false"/>
+            <parameter key="correlation" value="true"/>
+            <parameter key="squared_correlation" value="false"/>
+            <parameter key="prediction_average" value="false"/>
+            <parameter key="spearman_rho" value="false"/>
+            <parameter key="kendall_tau" value="false"/>
+            <parameter key="skip_undefined_labels" value="true"/>
+            <parameter key="use_example_weights" value="true"/>
+          </operator>
+          <operator activated="true" class="write_as_text" compatibility="9.6.000" expanded="true" height="124" name="SVM_WindowSize10 Results" width="90" x="648" y="34">
+            <parameter key="result_file" value="D:\My문서\2019-2020 NYU PhD 1\Data Science\SVM_WindowSize10.res"/>
+            <parameter key="encoding" value="SYSTEM"/>
+          </operator>
+          <connect from_op="Split Data (5)" from_port="out 1" to_op="Windowing (5)" to_port="example set"/>
+          <connect from_op="Split Data (5)" from_port="out 2" to_op="Windowing (15)" to_port="example set"/>
+          <connect from_op="Windowing (15)" from_port="windowed example set" to_op="Pred10" to_port="test data"/>
+          <connect from_op="Windowing (5)" from_port="windowed example set" to_op="Multiply (5)" to_port="input"/>
+          <connect from_op="Multiply (5)" from_port="output 1" to_op="Opt10" to_port="input 1"/>
+          <connect from_op="Multiply (5)" from_port="output 2" to_op="Pred10" to_port="training data"/>
+          <connect from_op="Opt10" from_port="model" to_op="Pred10" to_port="model"/>
+          <connect from_op="Opt10" from_port="parameter set" to_op="SVM_WindowSize10 Results" to_port="input 1"/>
+          <connect from_op="Pred10" from_port="example set output" to_op="Perf10" to_port="labelled data"/>
+          <connect from_op="Pred10" from_port="global weights output" to_op="SVM_WindowSize10 Results" to_port="input 2"/>
+          <connect from_op="Perf10" from_port="performance" to_op="SVM_WindowSize10 Results" to_port="input 3"/>
+          <connect from_op="SVM_WindowSize10 Results" from_port="input 1" to_port="out 1"/>
+          <connect from_op="SVM_WindowSize10 Results" from_port="input 2" to_port="out 2"/>
+          <connect from_op="SVM_WindowSize10 Results" from_port="input 3" to_port="out 3"/>
+          <portSpacing port="source_in 1" spacing="0"/>
+          <portSpacing port="sink_out 1" spacing="0"/>
+          <portSpacing port="sink_out 2" spacing="0"/>
+          <portSpacing port="sink_out 3" spacing="0"/>
+          <portSpacing port="sink_out 4" spacing="0"/>
+        </process>
+      </operator>
+      <connect from_op="SVM_WindowSize1" from_port="out 1" to_port="result 1"/>
+      <connect from_op="SVM_WindowSize1" from_port="out 2" to_port="result 2"/>
+      <connect from_op="SVM_WindowSize1" from_port="out 3" to_port="result 3"/>
+      <connect from_op="SVM_WindowSize2" from_port="out 1" to_port="result 4"/>
+      <connect from_op="SVM_WindowSize2" from_port="out 2" to_port="result 5"/>
+      <connect from_op="SVM_WindowSize2" from_port="out 3" to_port="result 6"/>
+      <connect from_op="SVM_WindowSize3" from_port="out 1" to_port="result 7"/>
+      <connect from_op="SVM_WindowSize3" from_port="out 2" to_port="result 8"/>
+      <connect from_op="SVM_WindowSize3" from_port="out 3" to_port="result 9"/>
+      <connect from_op="SVM_WindowSize7" from_port="out 1" to_port="result 10"/>
+      <connect from_op="SVM_WindowSize7" from_port="out 2" to_port="result 11"/>
+      <connect from_op="SVM_WindowSize7" from_port="out 3" to_port="result 12"/>
+      <connect from_op="SVM_WindowSize10" from_port="out 1" to_port="result 13"/>
+      <connect from_op="SVM_WindowSize10" from_port="out 2" to_port="result 14"/>
+      <connect from_op="SVM_WindowSize10" from_port="out 3" to_port="result 15"/>
+      <portSpacing port="source_input 1" spacing="0"/>
+      <portSpacing port="sink_result 1" spacing="0"/>
+      <portSpacing port="sink_result 2" spacing="0"/>
+      <portSpacing port="sink_result 3" spacing="0"/>
+      <portSpacing port="sink_result 4" spacing="0"/>
+      <portSpacing port="sink_result 5" spacing="0"/>
+      <portSpacing port="sink_result 6" spacing="0"/>
+      <portSpacing port="sink_result 7" spacing="0"/>
+      <portSpacing port="sink_result 8" spacing="0"/>
+      <portSpacing port="sink_result 9" spacing="0"/>
+      <portSpacing port="sink_result 10" spacing="0"/>
+      <portSpacing port="sink_result 11" spacing="0"/>
+      <portSpacing port="sink_result 12" spacing="0"/>
+      <portSpacing port="sink_result 13" spacing="0"/>
+      <portSpacing port="sink_result 14" spacing="0"/>
+      <portSpacing port="sink_result 15" spacing="0"/>
+      <portSpacing port="sink_result 16" spacing="0"/>
+    </process>
+  </operator>
+</process>

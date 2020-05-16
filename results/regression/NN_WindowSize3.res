@@ -3,10 +3,10 @@
 
 Performance: 
 PerformanceVector [
------root_mean_squared_error: 16.392 +/- 9.126 (micro average: 18.513 +/- 0.000)
------absolute_error: 12.833 +/- 7.751 (micro average: 12.833 +/- 13.343)
------relative_error: 6.01% +/- 2.71% (micro average: 6.01% +/- 5.63%)
------correlation: 0.713 +/- 0.249 (micro average: 0.929)
+-----root_mean_squared_error: 16.420 +/- 9.113 (micro average: 18.533 +/- 0.000)
+-----absolute_error: 12.858 +/- 7.741 (micro average: 12.858 +/- 13.346)
+-----relative_error: 6.02% +/- 2.71% (micro average: 6.02% +/- 5.63%)
+-----correlation: 0.712 +/- 0.249 (micro average: 0.929)
 ]
 Neural Net (3).training_cycles	= 200
 Neural Net (3).learning_rate	= 0.03162277660168379
@@ -51,8 +51,8 @@ sentiment_avg - 2: 0.000
 sentiment_avg - 1: 0.000
 
 11.05.2020 02:35:52 PerformanceVector:
-root_mean_squared_error: 16.866 +/- 0.000
-absolute_error: 11.392 +/- 12.437
-relative_error: 6.97% +/- 10.71%
+root_mean_squared_error: 16.869 +/- 0.000
+absolute_error: 11.395 +/- 12.439
+relative_error: 6.98% +/- 10.71%
 correlation: 0.951
 

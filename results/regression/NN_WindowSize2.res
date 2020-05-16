@@ -3,10 +3,10 @@
 
 Performance: 
 PerformanceVector [
------root_mean_squared_error: 15.652 +/- 7.232 (micro average: 17.073 +/- 0.000)
------absolute_error: 12.157 +/- 5.849 (micro average: 12.157 +/- 11.987)
------relative_error: 6.12% +/- 2.43% (micro average: 6.12% +/- 5.98%)
------correlation: 0.638 +/- 0.348 (micro average: 0.931)
+-----root_mean_squared_error: 15.646 +/- 7.248 (micro average: 17.074 +/- 0.000)
+-----absolute_error: 12.157 +/- 5.859 (micro average: 12.157 +/- 11.988)
+-----relative_error: 6.12% +/- 2.44% (micro average: 6.12% +/- 5.98%)
+-----correlation: 0.637 +/- 0.349 (micro average: 0.931)
 ]
 Neural Net (2).training_cycles	= 650
 Neural Net (2).learning_rate	= 0.003162277660168379
@@ -20,7 +20,7 @@ AddressCount - 1: 0.004
 AddressCount - 0: 0.024
 TransactionFee - 1: 0.121
 BlockReward - 1: 0.148
-BlockReward - 0: 0.023
+BlockReward - 0: 0.024
 count - 1: 0.071
 likes_avg - 1: 0.016
 retweets_avg - 1: 0.008
@@ -39,8 +39,8 @@ count - 0: 0.000
 sentiment_avg - 1: 0.000
 
 11.05.2020 01:50:36 PerformanceVector:
-root_mean_squared_error: 15.337 +/- 0.000
-absolute_error: 9.536 +/- 12.012
-relative_error: 5.79% +/- 9.92%
-correlation: 0.954
+root_mean_squared_error: 15.339 +/- 0.000
+absolute_error: 9.538 +/- 12.013
+relative_error: 5.79% +/- 9.93%
+correlation: 0.953
 

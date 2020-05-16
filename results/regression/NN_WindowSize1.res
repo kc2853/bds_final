@@ -3,8 +3,8 @@
 
 Performance: 
 PerformanceVector [
------root_mean_squared_error: 14.732 +/- 8.414 (micro average: 16.732 +/- 0.000)
------absolute_error: 11.704 +/- 7.147 (micro average: 11.704 +/- 11.957)
+-----root_mean_squared_error: 14.727 +/- 8.416 (micro average: 16.729 +/- 0.000)
+-----absolute_error: 11.704 +/- 7.144 (micro average: 11.704 +/- 11.952)
 -----relative_error: 5.68% +/- 2.51% (micro average: 5.68% +/- 5.12%)
 -----correlation: 0.772 +/- 0.213 (micro average: 0.933)
 ]
